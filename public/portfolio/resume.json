@@ -1,0 +1,132 @@
+{
+  "person": {
+    "name": "Sai Saran Rangisetti",
+    "location": "Tampa, FL",
+    "phone": "+1-813-415-6283",
+    "email": "saisaran6527@gmail.com",
+    "github": "https://github.com/srangisetti27",
+    "tagline": "Frontend Engineer crafting scalable React apps with data-driven UX"
+  },
+  "summary": "Frontend Software Engineer with React, Python, and AWS experience. Built interactive dashboards for real‑time analytics and improved UI consistency with a shared design system. Pursuing an MS in AI & Business Analytics to blend engineering with product impact.",
+  "education": [
+    {
+      "school": "University of South Florida",
+      "degree": "MS, Artificial Intelligence and Business Analytics",
+      "startDate": "2024-08",
+      "endDate": "2026-07",
+      "highlights": ["Coursework: Machine Learning, Deep Learning"],
+      "location": "Tampa, FL",
+      "logoAlt": "University of South Florida logo"
+    },
+    {
+      "school": "Chaitanya Bharathi Institute of Technology",
+      "degree": "B.E., Information Technology",
+      "startDate": "2017-08",
+      "endDate": "2021-06",
+      "location": "Hyderabad, IN",
+      "logoAlt": "CBIT college logo"
+    }
+  ],
+  "skills": {
+    "languages": ["Python", "JavaScript", "HTML", "CSS"],
+    "frameworks": ["React", "Redux", "Material UI", "Django", "FastAPI", "Node.js", "Express"],
+    "cloudDevOps": ["AWS (EC2, Lambda, S3, RDS)", "Docker", "Git", "GitHub Actions", "CI/CD"],
+    "dataML": ["Pandas", "NumPy", "Scikit-learn", "Jupyter", "Matplotlib", "SHAP", "FAISS", "SimCSE", "Transformers"],
+    "databases": ["PostgreSQL", "MySQL", "SQLite"],
+    "tools": ["VSCode", "Postman", "Android Studio"],
+    "process": ["Agile", "Scrum", "Jira"]
+  },
+  "experience": [
+    {
+      "role": "Senior Software Developer",
+      "company": "Zensar Technologies",
+      "location": "Hyderabad, IN",
+      "startDate": "2024-04",
+      "endDate": "2024-08",
+      "bullets": [
+        "Designed and built interactive React dashboards backed by SQL for real‑time analytics and faster decisions.",
+        "Automated reporting workflows in Python, reducing manual effort and improving operational efficiency.",
+        "Drove UI consistency with atomic design and a shared component library.",
+        "Led daily scrums and stakeholder updates aligning delivery with business goals.",
+        "Improved quality via code reviews and unit tests across the team."
+      ],
+      "tech": ["React", "TypeScript", "SQL", "Python", "Design System"],
+      "logoAlt": "Zensar Technologies wordmark"
+    },
+    {
+      "role": "Associate 2",
+      "company": "PwC (PricewaterhouseCoopers)",
+      "location": "Hyderabad, IN",
+      "startDate": "2022-08",
+      "endDate": "2023-12",
+      "bullets": [
+        "Led front‑end architecture for Guidewire PolicyCenter, improving a11y, responsiveness, and personalization.",
+        "Built automation for vehicle history retrievals via REST + React, reducing processing time.",
+        "Resolved high‑priority bugs across Guidewire modules in collaboration with backend and QA.",
+        "Delivered internal tech talks and documentation to speed onboarding and consistency.",
+        "Mentored junior developers on code quality and system architecture."
+      ],
+      "tech": ["React", "REST APIs", "Accessibility", "Guidewire"],
+      "logoAlt": "PwC logo with orange blocks"
+    },
+    {
+      "role": "Associate",
+      "company": "PwC (PricewaterhouseCoopers)",
+      "location": "Hyderabad, IN",
+      "startDate": "2021-09",
+      "endDate": "2022-08",
+      "bullets": [
+        "Developed a reusable dashboard used across multiple Guidewire implementations, cutting duplicate efforts.",
+        "Ran usability testing with clients and engineers; shipped UX improvements from qualitative feedback.",
+        "Earned Guidewire Associate Certification with ClaimCenter/BillingCenter exposure.",
+        "Contributed across SDLC: planning, development, and production releases with cross‑border teams."
+      ],
+      "tech": ["React", "Guidewire", "UX Research"],
+      "logoAlt": "PwC logo with orange blocks"
+    }
+  ],
+  "projects": [
+    {
+      "name": "AI Recycling Detection",
+      "org": "University of South Florida",
+      "startDate": "2025-05",
+      "endDate": "2025-08",
+      "hook": "Classified recyclable materials with ML and surfaced results on a visual dashboard.",
+      "outcomes": [
+        "Implemented Python classification pipeline on structured/unstructured inputs.",
+        "Integrated model outputs with a React dashboard for monitoring.",
+        "Collaborated on data prep and QR‑based tracking prototype."
+      ],
+      "tech": ["Python", "Pandas", "Scikit‑learn", "React"],
+      "logoAlt": "Recycling icon with AI nodes"
+    },
+    {
+      "name": "Embedded Night System for Pedestrian Detection",
+      "org": "CBIT",
+      "startDate": "2019-09",
+      "endDate": "2020-01",
+      "hook": "Real‑time pedestrian detection prototype using embedded sensors and feature extraction.",
+      "outcomes": [
+        "Collected and analyzed live sensor data to detect motion patterns.",
+        "Implemented logic‑based algorithms for movement detection.",
+        "Built foundation for embedded ML concepts."
+      ],
+      "tech": ["Embedded Systems", "Signal Processing"],
+      "logoAlt": "Pedestrian crossing icon on dark background"
+    },
+    {
+      "name": "Infrastructure Automation Using Terraform",
+      "org": "CBIT",
+      "startDate": "2019-09",
+      "endDate": "2020-01",
+      "hook": "Provisioned AWS resources with Terraform to streamline DevOps workflows.",
+      "outcomes": [
+        "Automated EC2, S3, and IAM policies for reusable environments.",
+        "Codified infrastructure for repeatable deployments.",
+        "Improved delivery speed with IaC best practices."
+      ],
+      "tech": ["Terraform", "AWS EC2", "AWS S3", "IAM"],
+      "logoAlt": "Terraform logo with AWS cloud"
+    }
+  ]
+}
