@@ -7,6 +7,10 @@ export const SEARCH_BUTTON_TITLE = "Type here to search";
 export const importAIButton = () =>
   import("components/system/Taskbar/AI/AIButton");
 export const importAIChat = () => import("components/system/Taskbar/AI/AIChat");
+export const importCopilotButton = () =>
+  import("components/system/Taskbar/AI/CopilotButton");
+export const importCopilotPalette = () =>
+  import("components/system/Taskbar/AI/CopilotPalette");
 export const importCalendar = () =>
   import("components/system/Taskbar/Calendar");
 export const importSearch = () => import("components/system/Taskbar/Search");

@@ -2,6 +2,7 @@ import { basename } from "path";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import Navigation from "components/apps/FileExplorer/Navigation";
 import StyledFileExplorer from "components/apps/FileExplorer/StyledFileExplorer";
+import AskPanel from "components/apps/FileExplorer/AskPanel";
 import { type ComponentProcessProps } from "components/system/Apps/RenderComponent";
 import { getIconFromIni } from "components/system/Files/FileEntry/functions";
 import FileManager from "components/system/Files/FileManager";
@@ -123,6 +124,7 @@ const FileExplorer: FC<ComponentProcessProps> = ({ id }) => {
 
   return url ? (
     <StyledFileExplorer>
+      <AskPanel folderPath={url} />
       <Navigation
         addressBarRef={addressBarRef}
         hideSearch={Boolean(mountUrl)}

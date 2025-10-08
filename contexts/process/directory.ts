@@ -407,6 +407,16 @@ const directory: Processes = {
     singleton: true,
     title: "Webamp",
   },
+  SystemLog: {
+    Component: dynamic(() => import("components/apps/SystemLog")),
+    backgroundColor: "#1e1e1e",
+    defaultSize: {
+      height: 400,
+      width: 600,
+    },
+    icon: "/System/Icons/terminal.webp",
+    title: "System Log",
+  },
 };
 
 export default directory;

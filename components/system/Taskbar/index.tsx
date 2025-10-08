@@ -1,4 +1,4 @@
-import { memo, useCallback, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { AnimatePresence } from "motion/react";
 import {
@@ -7,6 +7,8 @@ import {
   importCalendar,
   importSearch,
   importStartMenu,
+  importCopilotButton,
+  importCopilotPalette,
 } from "components/system/Taskbar/functions";
 import Clock from "components/system/Taskbar/Clock";
 import SearchButton from "components/system/Taskbar/Search/SearchButton";
@@ -23,6 +25,8 @@ const AIChat = dynamic(importAIChat);
 const Calendar = dynamic(importCalendar);
 const Search = dynamic(importSearch);
 const StartMenu = dynamic(importStartMenu);
+const CopilotButton = dynamic(importCopilotButton);
+const CopilotPalette = dynamic(importCopilotPalette);
 
 const Taskbar: FC = () => {
   const [startMenuVisible, setStartMenuVisible] = useState(false);
@@ -32,6 +36,8 @@ const Taskbar: FC = () => {
   const [clockWidth, setClockWidth] = useState(CLOCK_CANVAS_BASE_WIDTH);
   const { aiEnabled } = useSession();
   const hasWindowAI = useWindowAI();
+  const [copilotVisible, setCopilotVisible] = useState(false);
+  const [isClient, setIsClient] = useState(false);
   const toggleStartMenu = useCallback(
     (showMenu?: boolean): void =>
       setStartMenuVisible((currentMenuState) => showMenu ?? !currentMenuState),
@@ -58,6 +64,10 @@ const Taskbar: FC = () => {
   );
   const hasAI = hasWindowAI || aiEnabled;
 
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   return (
     <>
       <AnimatePresence initial={false} presenceAffectsLayout={false}>
@@ -83,12 +93,16 @@ const Taskbar: FC = () => {
           width={clockWidth}
         />
         {hasAI && <AIButton aiVisible={aiVisible} toggleAI={toggleAI} />}
+        {isClient && <CopilotButton open={copilotVisible} toggle={() => setCopilotVisible((v) => !v)} />}
       </StyledTaskbar>
       <AnimatePresence initial={false} presenceAffectsLayout={false}>
         {calendarVisible && (
           <Calendar key="calendar" toggleCalendar={toggleCalendar} />
         )}
         {aiVisible && <AIChat key="aiChat" toggleAI={toggleAI} />}
+        {isClient && copilotVisible && (
+          <CopilotPalette key="copilot" toggle={() => setCopilotVisible(false)} />
+        )}
       </AnimatePresence>
     </>
   );

@@ -67,35 +67,12 @@ export const WALLPAPER_MENU: WallpaperMenuItem[] = [
     name: "Coastal Landscape",
   },
   {
-    id: "HEXELLS",
-    name: "Hexells",
+    id: "/Users/Public/Videos/im-vengeance-the-batman-moewalls-com.mp4",
+    name: "Batman Vengeance",
   },
   {
-    id: "MATRIX 2D",
-    name: "Matrix (2D)",
-  },
-  {
-    id: "MATRIX 3D",
-    name: "Matrix (3D)",
-  },
-  {
-    id: "APOD",
-    name: "NASA APOD",
-    startsWith: true,
-  },
-  {
-    id: "SLIDESHOW",
-    name: "Picture Slideshow",
-  },
-  {
-    id: "STABLE_DIFFUSION",
-    name: "Stable Diffusion (beta)",
-    requiresWebGPU: true,
-  },
-  {
-    id: "VANTA",
-    name: "Vanta Waves",
-    startsWith: true,
+    id: "/Users/Public/Videos/batman-beyond-moewalls-com.mp4",
+    name: "Batman Beyond",
   },
 ];
 
