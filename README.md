@@ -2,6 +2,9 @@
 
 ## _Desktop environment in the browser_
 
+### 🚀 **Live Demo**
+Deployed and ready to use!
+
 ![Screenshot](https://raw.githubusercontent.com/DustinBrett/daedalOS/refs/heads/main/public/screenshot.png?raw=true)
 
 ### Feature Overview
