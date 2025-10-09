@@ -5,7 +5,7 @@ import {
   type FileSystem,
 } from "browserfs/dist/node/core/file_system";
 import { type ApiError } from "browserfs/dist/node/core/api_error";
-import { type FSModule } from "browserfs/dist/node/core/FS";
+import type { BFSFS } from "browserfs";
 import type IZipFS from "browserfs/dist/node/backend/ZipFS";
 import type IIsoFS from "browserfs/dist/node/backend/IsoFS";
 import type * as IBrowserFS from "browserfs";
@@ -97,7 +97,7 @@ type FileSystemContextState = AsyncFS & {
     overwrite?: boolean
   ) => Promise<string>;
   deletePath: (path: string) => Promise<boolean>;
-  fs?: FSModule;
+  fs?: BFSFS;
   mapFs: (
     directory: string,
     existingHandle?: FileSystemDirectoryHandle
