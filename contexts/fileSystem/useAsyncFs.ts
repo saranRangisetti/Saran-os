@@ -206,8 +206,8 @@ const useAsyncFs = (): AsyncFSModule => {
                   FileType.FILE,
                   get9pSize(path),
                   (stats as any).mode,
-                  (stats as any).atimeMs,
-                  (stats as any).mtimeMs,
+                  (stats as any).atime,
+                  (stats as any).mtime,
                   (stats as any).ctime,
                   (stats as any).birthtime
                 )

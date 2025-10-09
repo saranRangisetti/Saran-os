@@ -81,7 +81,7 @@ export const isExistingFile = (
 ): boolean => Boolean(birthtime && birthtime === ctime);
 
 export const getModifiedTime = (path: string, stats: FileStat): number => {
-  const { mtimeMs } = stats;
+  const { mtime } = stats;
 
   if (isExistingFile(stats)) {
     const storedMtime = get9pModifiedTime(path);
@@ -89,7 +89,7 @@ export const getModifiedTime = (path: string, stats: FileStat): number => {
     if (storedMtime > 0) return storedMtime;
   }
 
-  return mtimeMs;
+  return mtime;
 };
 
 export const getIconFromIni = (
