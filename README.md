@@ -1,15 +1,22 @@
-## 🌌 **daedalOS** 🌌
+## 🌌 **SaranOS** 🌌
 
-## _Desktop environment in the browser_
+## _Desktop environment in the browser by Sai Saran_
 
 ### 🚀 **Live Demo**
 Deployed and ready to use!
 
-![Screenshot](https://raw.githubusercontent.com/DustinBrett/daedalOS/refs/heads/main/public/screenshot.png?raw=true)
+![Screenshot](https://raw.githubusercontent.com/saranRangisetti/Saran-os/main/public/screenshot.png?raw=true)
 
 ### Feature Overview
 
 [![Feature Overview](https://img.youtube.com/vi/djCqHH0SCmA/mqdefault.jpg)](http://www.youtube.com/watch?v=djCqHH0SCmA)
+
+---
+
+**Created by [Sai Saran Rangisetti](https://github.com/saranRangisetti)**  
+*A modern take on desktop computing in your browser*
+
+---
 
 # System 🧠
 
@@ -241,6 +248,16 @@ Deployed and ready to use!
 
 - Port of the classic first-person shooter
 
+# About the Creator 👨‍💻
+
+**Sai Saran Rangisetti** is a passionate developer who created SaranOS as a modern interpretation of desktop computing in the browser. This project showcases the power of web technologies to recreate the familiar desktop experience we all know and love.
+
+- 🌐 **GitHub**: [@saranRangisetti](https://github.com/saranRangisetti)
+- 📧 **Email**: saisaran6527@gmail.com
+- 🚀 **Live Demo**: [Deployed on Vercel](https://saran-os.vercel.app)
+
+---
+
 # Try It 🚀
 
 ##### Requirements
@@ -250,7 +267,7 @@ Deployed and ready to use!
 
 ##### Development
 
-```
+```bash
 yarn install
 yarn build:prebuild
 yarn dev
@@ -258,7 +275,7 @@ yarn dev
 
 ##### Production
 
-```
+```bash
 yarn install
 yarn build
 yarn serve
@@ -266,11 +283,11 @@ yarn serve
 
 ##### Docker
 
-```
-docker build -t daedalos .
-docker run -dp 3000:3000 --rm --name daedalos daedalos
+```bash
+docker build -t saranos .
+docker run -dp 3000:3000 --rm --name saranos saranos
 ```
 
 ##### Notes
 
-- If during `yarn install` you receive the error `digital envelope routines::unsupported`, you need to set `NODE_OPTIONS` to `--openssl-legacy-provider` ([1](https://github.com/DustinBrett/daedalOS/blob/main/Dockerfile#L3), [2](https://github.com/DustinBrett/daedalOS/blob/main/.github/workflows/main.yml#L17), [3](https://stackoverflow.com/a/69699772/5895982))
+- If during `yarn install` you receive the error `digital envelope routines::unsupported`, you need to set `NODE_OPTIONS` to `--openssl-legacy-provider`

@@ -1,11 +1,11 @@
 {
-  "name": "daedalos",
+  "name": "saranos",
   "version": "2.0.0",
-  "description": "Desktop environment in the browser",
+  "description": "SaranOS - Desktop environment in the browser by Sai Saran",
   "author": {
     "name": "Sai Saran Rangisetti",
     "email": "saisaran6527@gmail.com",
-    "url": "https://github.com/srangisetti27"
+    "url": "https://github.com/saranRangisetti"
   },
   "license": "MIT",
   "browserslist": [
