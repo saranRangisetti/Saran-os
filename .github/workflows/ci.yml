@@ -1,4 +1,4 @@
-name: ci
+name: ci-npm
 
 on:
   push:
@@ -19,7 +19,7 @@ jobs:
           node-version: 20
           cache: "npm"
 
-      - name: Install dependencies
+      - name: Install dependencies (npm)
         run: npm ci
 
       - name: Lint
