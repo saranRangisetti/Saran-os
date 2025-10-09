@@ -208,8 +208,8 @@ const useAsyncFs = (): AsyncFSModule => {
                   (stats as any).mode,
                   (stats as any).atimeMs,
                   (stats as any).mtimeMs,
-                  (stats as any).ctimeMs,
-                  (stats as any).birthtimeMs
+                  (stats as any).ctime,
+                  (stats as any).birthtime
                 )
               );
             }
