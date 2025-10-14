@@ -24,6 +24,19 @@ export type RagResult = {
 
 const RAG_PREFIX = "rag:index:";
 
+function makeSnippet(text: string, query: string): string {
+  const q = query.split(/\s+/)[0] || "";
+  const i = q ? text.toLowerCase().indexOf(q.toLowerCase()) : -1;
+  if (i === -1) return text.slice(0, 180).replace(/\s+/g, " ").trim();
+  const start = Math.max(0, i - 60);
+  const end = Math.min(text.length, i + 120);
+  return (
+    (start > 0 ? "…" : "") +
+    text.slice(start, end).replace(/\s+/g, " ").trim() +
+    (end < text.length ? "…" : "")
+  );
+}
+
 interface LunrModule {
   (config: (this: LunrIndex) => void): LunrIndex;
   Index: {
@@ -40,22 +53,32 @@ async function ensureLunr(): Promise<LunrModule> {
     const script = document.createElement("script");
     script.src = "/System/lunr/lunr.min.js";
     script.async = true;
-    script.addEventListener('load', () => resolve());
-    script.addEventListener('error', () => reject(new Error("Failed to load lunr")));
+    script.addEventListener("load", () => resolve());
+    script.addEventListener("error", () =>
+      reject(new Error("Failed to load lunr"))
+    );
     document.head.append(script);
   });
 
   return (globalThis as unknown as { lunr: LunrModule }).lunr;
 }
 
-export async function loadFolderIndex(folderPath: string): Promise<{ docs: RagDoc[], indexJson: unknown; } | undefined> {
+export async function loadFolderIndex(
+  folderPath: string
+): Promise<{ docs: RagDoc[]; indexJson: unknown } | undefined> {
   const db = await getKeyValStore();
   const key = `${RAG_PREFIX}${folderPath}`;
-  const stored = (await db.get(KEYVAL_STORE_NAME, key)) as { docs: RagDoc[], indexJson: unknown; } | undefined;
+  const stored = (await db.get(KEYVAL_STORE_NAME, key)) as
+    | { docs: RagDoc[]; indexJson: unknown }
+    | undefined;
   return stored;
 }
 
-export async function saveFolderIndex(folderPath: string, indexJson: unknown, docs: RagDoc[]): Promise<void> {
+export async function saveFolderIndex(
+  folderPath: string,
+  indexJson: unknown,
+  docs: RagDoc[]
+): Promise<void> {
   const db = await getKeyValStore();
   const key = `${RAG_PREFIX}${folderPath}`;
   await db.put(KEYVAL_STORE_NAME, { docs, indexJson }, key);
@@ -65,28 +88,34 @@ export async function buildFolderIndex(
   folderPath: string,
   list: (path: string) => Promise<string[]>,
   readFile: (path: string) => Promise<Buffer>
-): Promise<{ docs: RagDoc[], indexJson: unknown; }> {
+): Promise<{ docs: RagDoc[]; indexJson: unknown }> {
   const lunr = await ensureLunr();
 
   const entries = await list(folderPath);
   const textFiles = entries.filter((name) => /\.(?:md|txt)$/i.test(name));
 
   const docs: RagDoc[] = [];
-  const processFiles = async (): Promise<void> => {
-    for (const name of textFiles) {
+
+  // Process files in parallel to avoid await in loop
+  const filePromises = textFiles.map(
+    async (name): Promise<RagDoc | undefined> => {
       const fullPath = `${folderPath}${folderPath.endsWith("/") ? "" : "/"}${name}`;
       try {
         const buf = await readFile(fullPath);
         const content = buf.toString();
         const title = name.replace(/\.(?:md|txt)$/i, "");
-        docs.push({ content, id: fullPath, path: fullPath, title });
+        return { content, id: fullPath, path: fullPath, title };
       } catch {
         // ignore unreadable files
+        return undefined;
       }
     }
-  };
-  
-  await processFiles();
+  );
+
+  const results = await Promise.all(filePromises);
+  results.forEach((doc) => {
+    if (doc) docs.push(doc);
+  });
 
   const idx: LunrIndex = lunr(function buildIndex(this: LunrIndex) {
     this.ref("id");
@@ -128,14 +157,3 @@ export async function queryFolder(
     return { path: d.path, score, snippet, title: d.title };
   });
 }
-
-function makeSnippet(text: string, query: string): string {
-  const q = query.split(/\s+/)[0] || "";
-  const i = q ? text.toLowerCase().indexOf(q.toLowerCase()) : -1;
-  if (i === -1) return text.slice(0, 180).replace(/\s+/g, " ").trim();
-  const start = Math.max(0, i - 60);
-  const end = Math.min(text.length, i + 120);
-  return (start > 0 ? "…" : "") + text.slice(start, end).replace(/\s+/g, " ").trim() + (end < text.length ? "…" : "");
-}
-
-
