@@ -1,6 +1,6 @@
 import { basename, dirname, join } from "path";
 import ini from "ini";
-import type { BFSFS } from "browserfs";
+import  { type FSModule } from "browserfs/dist/node/core/FS";
 import type Stats from "browserfs/dist/node/core/node_fs_stats";
 import { monacoExtensions } from "components/apps/MonacoEditor/extensions";
 import extensions from "components/system/Files/FileEntry/extensions";
@@ -89,11 +89,11 @@ export const getModifiedTime = (path: string, stats: FileStat): number => {
     if (storedMtime > 0) return storedMtime;
   }
 
-  return mtime;
+  return mtime instanceof Date ? mtime.getTime() : mtime;
 };
 
 export const getIconFromIni = (
-  fs: BFSFS,
+  fs: FSModule,
   directory: string
 ): Promise<string> =>
   new Promise((resolve) => {
@@ -212,7 +212,7 @@ export const makeExternalShortcut = (contents: Buffer): Buffer => {
 };
 
 export const getCachedIconUrl = async (
-  fs: BFSFS,
+  fs: FSModule,
   cachedIconPath: string
 ): Promise<string> =>
   new Promise((resolve) => {
@@ -234,7 +234,7 @@ export const getCachedIconUrl = async (
     });
   });
 
-const getIconsFromCache = (fs: BFSFS, path: string): Promise<string[]> =>
+const getIconsFromCache = (fs: FSModule, path: string): Promise<string[]> =>
   new Promise((resolve) => {
     const iconCacheDirectory = join(ICON_CACHE, path);
 
@@ -295,7 +295,7 @@ export const getCoverArt = async (
 };
 
 export const getInfoWithoutExtension = (
-  fs: BFSFS,
+  fs: FSModule,
   rootFs: RootFileSystem,
   path: string,
   isDirectory: boolean,
@@ -347,7 +347,7 @@ export const getInfoWithoutExtension = (
 };
 
 export const getInfoWithExtension = (
-  fs: BFSFS,
+  fs: FSModule,
   path: string,
   extension: string,
   callback: (value: FileInfo) => void

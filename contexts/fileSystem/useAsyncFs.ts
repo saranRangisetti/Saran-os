@@ -1,5 +1,5 @@
 import { join } from "path";
-import type { BFSFS } from "browserfs";
+import  { type FSModule } from "browserfs/dist/node/core/FS";
 import type Stats from "browserfs/dist/node/core/node_fs_stats";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type * as IBrowserFS from "browserfs";
@@ -39,15 +39,15 @@ export type AsyncFS = {
 const { BFSRequire, configure } = BrowserFS as typeof IBrowserFS;
 
 const getFsStatics = (): {
-  Stats: new (...args: any[]) => Stats;
   FileType: any;
+  Stats: new (...args: any[]) => Stats;
 } => {
   const fsModule = BFSRequire("fs") as unknown as {
-    Stats: new (...args: any[]) => Stats;
     FileType: any;
+    Stats: new (...args: any[]) => Stats;
   };
 
-  return { Stats: fsModule.Stats, FileType: fsModule.FileType };
+  return { FileType: fsModule.FileType, Stats: fsModule.Stats };
 };
 
 export type EmscriptenFS = {
@@ -74,7 +74,7 @@ export type RootFileSystem = Omit<
 };
 
 type AsyncFSModule = AsyncFS & {
-  fs?: BFSFS;
+  fs?: FSModule;
   rootFs?: RootFileSystem;
 };
 
@@ -82,12 +82,12 @@ type FsQueueCall = [string, unknown[]];
 
 const mockFsCallQueue: FsQueueCall[] = [];
 
-const runQueuedFsCalls = (fs: BFSFS): void => {
+const runQueuedFsCalls = (fs: FSModule): void => {
   if (mockFsCallQueue.length > 0) {
     const [name, args] = mockFsCallQueue.shift() as FsQueueCall;
 
     if (name in fs) {
-      const fsCall = fs[name as keyof BFSFS];
+      const fsCall = fs[name as keyof FSModule];
 
       if (typeof fsCall === "function") {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type, @typescript-eslint/no-unsafe-call
@@ -100,8 +100,8 @@ const runQueuedFsCalls = (fs: BFSFS): void => {
 };
 
 const useAsyncFs = (): AsyncFSModule => {
-  const [fs, setFs] = useState<BFSFS>();
-  const fsRef = useRef<BFSFS>(undefined);
+  const [fs, setFs] = useState<FSModule>();
+  const fsRef = useRef<FSModule>(undefined);
   const [rootFs, setRootFs] = useState<RootFileSystem>();
   const asyncFs: AsyncFS = useMemo(
     () => ({
@@ -154,8 +154,7 @@ const useAsyncFs = (): AsyncFSModule => {
                 oldPath,
                 (_statsError, stats = Object.create(null) as Stats) => {
                   if (
-                    (stats as any).isDirectory &&
-                    (stats as any).isDirectory()
+                    (stats as any).isDirectory?.()
                   ) {
                     reject(new Error("Renaming directories is not supported."));
                   } else {
@@ -280,7 +279,7 @@ const useAsyncFs = (): AsyncFSModule => {
         (...args: unknown[]) => {
           if (fsRef.current) {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type, @typescript-eslint/no-unsafe-call
-            (fsRef.current[name as keyof BFSFS] as unknown as Function)(
+            (fsRef.current[name as keyof FSModule] as unknown as Function)(
               ...args
             );
           } else mockFsCallQueue.push([name, args]);
@@ -297,7 +296,7 @@ const useAsyncFs = (): AsyncFSModule => {
         stat: queueFsCall("stat"),
         unlink: queueFsCall("unlink"),
         writeFile: queueFsCall("writeFile"),
-      } as Partial<BFSFS> as BFSFS);
+      } as Partial<FSModule> as FSModule);
     } else if ("getRootFS" in fs) {
       runQueuedFsCalls(fs);
     } else {
@@ -305,8 +304,8 @@ const useAsyncFs = (): AsyncFSModule => {
         configure(FileSystemConfig(!writeToIndexedDB), () => {
           const loadedFs = BFSRequire("fs");
 
-          fsRef.current = loadedFs as unknown as BFSFS;
-          setFs(loadedFs as unknown as BFSFS);
+          fsRef.current = loadedFs as unknown as FSModule;
+          setFs(loadedFs as unknown as FSModule);
           setRootFs((loadedFs as any).getRootFS() as RootFileSystem);
         });
 

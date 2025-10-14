@@ -1,5 +1,5 @@
 import { join } from "path";
-import type { BFSFS } from "browserfs";
+import  { type FSModule } from "browserfs/dist/node/core/FS";
 import type Stats from "browserfs/dist/node/core/node_fs_stats";
 import {
   getCachedIconUrl,
@@ -26,7 +26,7 @@ export type ResultInfo = {
 };
 
 export const getResultInfo = async (
-  fs: BFSFS | undefined,
+  fs: FSModule | undefined,
   url: string,
   signal?: AbortSignal
 ): Promise<ResultInfo | undefined> => {

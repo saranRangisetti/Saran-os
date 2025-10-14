@@ -298,6 +298,16 @@ const directory: Processes = {
     singleton: true,
     title: "Stable Diffusion",
   },
+  SystemLog: {
+    Component: dynamic(() => import("components/apps/SystemLog")),
+    backgroundColor: "#1e1e1e",
+    defaultSize: {
+      height: 400,
+      width: 600,
+    },
+    icon: "/System/Icons/terminal.webp",
+    title: "System Log",
+  },
   Terminal: {
     Component: dynamic(() => import("components/apps/Terminal")),
     backgroundBlur: "8px",
@@ -406,16 +416,6 @@ const directory: Processes = {
     libs: ["/Program Files/Webamp/webamp.bundle.min.js"],
     singleton: true,
     title: "Webamp",
-  },
-  SystemLog: {
-    Component: dynamic(() => import("components/apps/SystemLog")),
-    backgroundColor: "#1e1e1e",
-    defaultSize: {
-      height: 400,
-      width: 600,
-    },
-    icon: "/System/Icons/terminal.webp",
-    title: "System Log",
   },
 };
 

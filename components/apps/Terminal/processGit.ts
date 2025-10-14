@@ -1,5 +1,5 @@
 import { join } from "path";
-import type { BFSFS } from "browserfs";
+import  { type FSModule } from "browserfs/dist/node/core/FS";
 import {
   type AuthCallback,
   type GitAuth,
@@ -45,7 +45,7 @@ const processGit = async (
   [command, ...args]: string[],
   cd: string,
   printLn: (message: string) => void,
-  fs: BFSFS,
+  fs: FSModule,
   updateFolder: (folder: string, newFile?: string, oldFile?: string) => void
 ): Promise<void> => {
   const git = await import("isomorphic-git");

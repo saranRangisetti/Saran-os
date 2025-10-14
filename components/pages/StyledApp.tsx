@@ -23,7 +23,6 @@ const StyledApp: FC = ({ children }) => {
   const brandedTheme = useMemo(
     () => ({
       ...activeTheme,
-      name: branding.name || activeTheme.name,
       colors: {
         ...activeTheme.colors,
         background: branding.colors.background || activeTheme.colors.background,
@@ -53,6 +52,7 @@ const StyledApp: FC = ({ children }) => {
           outline: activeTheme.colors.window.outline,
         },
       },
+      name: branding.name || activeTheme.name,
     }),
     [activeTheme]
   );

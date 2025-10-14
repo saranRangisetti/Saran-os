@@ -31,8 +31,8 @@ const AskPanel: FC<AskPanelProps> = ({ folderPath }) => {
   }, [folderPath, query, readdir, readFile]);
 
   return (
-    <div style={{ padding: 8, borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+    <div style={{ borderBottom: "1px solid rgba(255,255,255,0.08)", padding: 8 }}>
+      <div style={{ alignItems: "center", display: "flex", gap: 8 }}>
         <Button onClick={() => {
           setOpen((v) => !v);
           if (!open) setTimeout(() => inputRef.current?.focus(), 0);
@@ -41,13 +41,13 @@ const AskPanel: FC<AskPanelProps> = ({ folderPath }) => {
           <>
             <input
               ref={inputRef}
-              value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Ask a question about files here"
-              style={{ flex: 1, minWidth: 120 }}
               onKeyDown={(e) => {
                 if (e.key === "Enter") runQuery();
               }}
+              placeholder="Ask a question about files here"
+              style={{ flex: 1, minWidth: 120 }}
+              value={query}
             />
             <Button disabled={disabled} onClick={runQuery}>
               {loading ? "Searching…" : "Ask"}
@@ -56,9 +56,9 @@ const AskPanel: FC<AskPanelProps> = ({ folderPath }) => {
         )}
       </div>
       {open && results.length > 0 && (
-        <ol style={{ marginTop: 8, display: "grid", gap: 6 }}>
+        <ol style={{ display: "grid", gap: 6, marginTop: 8 }}>
           {results.map(({ path, title, snippet, score }) => (
-            <li key={path} title={path} style={{ opacity: 0.95 }}>
+            <li key={path} style={{ opacity: 0.95 }} title={path}>
               <div style={{ fontWeight: 600 }}>{title}</div>
               <div style={{ fontSize: 12, opacity: 0.8 }}>{snippet}</div>
               <div style={{ fontSize: 11, opacity: 0.6 }}>Score: {score.toFixed(3)}</div>

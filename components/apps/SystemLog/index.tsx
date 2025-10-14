@@ -1,13 +1,13 @@
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState, type FC } from "react";
 import { type ComponentProcessProps } from "components/system/Apps/RenderComponent";
 import { useProcesses } from "contexts/process";
 import Button from "styles/common/Button";
 
 type LogEntry = {
-  timestamp: string;
+  details?: string;
   level: "info" | "warn" | "error";
   message: string;
-  details?: string;
+  timestamp: string;
 };
 
 const SystemLog: FC<ComponentProcessProps> = ({ id }) => {
@@ -24,14 +24,14 @@ const SystemLog: FC<ComponentProcessProps> = ({ id }) => {
     if (autoScroll && logRef.current) {
       logRef.current.scrollTop = logRef.current.scrollHeight;
     }
-  }, [logs, autoScroll]);
+  }, [autoScroll]);
 
-  const addLog = useCallback((level: LogEntry["level"], message: string, details?: string) => {
+  const addLog = useCallback((level: LogEntry["level"], message: string, details?: string): void => {
     const entry: LogEntry = {
-      timestamp: typeof window !== 'undefined' ? new Date().toLocaleTimeString() : '',
+      details,
       level,
       message,
-      details,
+      timestamp: typeof window === 'undefined' ? '' : new Date().toLocaleTimeString(),
     };
     setLogs(prev => [...prev, entry].slice(-100)); // Keep last 100 entries
   }, []);
@@ -40,7 +40,7 @@ const SystemLog: FC<ComponentProcessProps> = ({ id }) => {
     setLogs([]);
   }, []);
 
-  const exportLogs = useCallback(async () => {
+  const exportLogs = useCallback((): void => {
     const logText = logs.map(log => 
       `[${log.timestamp}] ${log.level.toUpperCase()}: ${log.message}${log.details ? `\n  ${log.details}` : ""}`
     ).join("\n");
@@ -56,71 +56,74 @@ const SystemLog: FC<ComponentProcessProps> = ({ id }) => {
 
   // Expose addLog globally for Copilot to use
   useEffect(() => {
-    (window as any).addSystemLog = addLog;
+    const windowWithSystemLog = window as typeof window & {
+      addSystemLog?: (level: string, message: string, details?: string) => void;
+    };
+    windowWithSystemLog.addSystemLog = addLog;
     return () => {
-      delete (window as any).addSystemLog;
+      delete windowWithSystemLog.addSystemLog;
     };
   }, [addLog]);
 
   return (
-    <div style={{ height: "100%", display: "flex", flexDirection: "column", padding: 8 }}>
-      <div style={{ display: "flex", gap: 8, marginBottom: 8, alignItems: "center" }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%", padding: 8 }}>
+      <div style={{ alignItems: "center", display: "flex", gap: 8, marginBottom: 8 }}>
         <Button onClick={clearLogs}>Clear</Button>
-        <Button onClick={exportLogs} disabled={logs.length === 0}>Export</Button>
-        <label style={{ display: "flex", alignItems: "center", gap: 4 }}>
+        <Button disabled={logs.length === 0} onClick={exportLogs}>Export</Button>
+        <label style={{ alignItems: "center", display: "flex", gap: 4 }}>
           <input
-            type="checkbox"
             checked={autoScroll}
             onChange={(e) => setAutoScroll(e.target.checked)}
+            type="checkbox"
           />
           Auto-scroll
         </label>
-        <span style={{ marginLeft: "auto", fontSize: 12, opacity: 0.7 }}>
+        <span style={{ fontSize: 12, marginLeft: "auto", opacity: 0.7 }}>
           {logs.length} entries
         </span>
       </div>
       <div
         ref={logRef}
         style={{
+          backgroundColor: "rgba(0,0,0,0.1)",
+          borderRadius: 4,
           flex: 1,
-          overflow: "auto",
           fontFamily: "monospace",
           fontSize: 12,
-          backgroundColor: "rgba(0,0,0,0.1)",
+          overflow: "auto",
           padding: 8,
-          borderRadius: 4,
         }}
       >
         {logs.length === 0 ? (
-          <div style={{ opacity: 0.5, textAlign: "center", marginTop: 20 }}>
+          <div style={{ marginTop: 20, opacity: 0.5, textAlign: "center" }}>
             No log entries yet. Copilot actions will appear here.
           </div>
         ) : (
           logs.map((log, index) => (
             <div
-              key={index}
+              key={`log-${index}-${log.timestamp}`}
               style={{
-                marginBottom: 4,
-                padding: 4,
-                borderRadius: 2,
                 backgroundColor: log.level === "error" ? "rgba(255,0,0,0.1)" : 
                                log.level === "warn" ? "rgba(255,255,0,0.1)" : 
                                "rgba(0,255,0,0.05)",
+                borderRadius: 2,
+                marginBottom: 4,
+                padding: 4,
               }}
             >
-              <div style={{ display: "flex", gap: 8, alignItems: "baseline" }}>
-                <span style={{ opacity: 0.6, fontSize: 10 }}>{log.timestamp}</span>
+              <div style={{ alignItems: "baseline", display: "flex", gap: 8 }}>
+                <span style={{ fontSize: 10, opacity: 0.6 }}>{log.timestamp}</span>
                 <span style={{ 
-                  fontWeight: "bold", 
                   color: log.level === "error" ? "#ff6b6b" : 
-                         log.level === "warn" ? "#ffd93d" : "#6bcf7f"
+                         log.level === "warn" ? "#ffd93d" : "#6bcf7f", 
+                  fontWeight: "bold"
                 }}>
                   {log.level.toUpperCase()}
                 </span>
                 <span>{log.message}</span>
               </div>
               {log.details && (
-                <div style={{ marginLeft: 20, opacity: 0.8, fontSize: 11 }}>
+                <div style={{ fontSize: 11, marginLeft: 20, opacity: 0.8 }}>
                   {log.details}
                 </div>
               )}

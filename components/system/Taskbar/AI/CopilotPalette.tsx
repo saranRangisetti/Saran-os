@@ -1,10 +1,9 @@
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState, type FC } from "react";
 import StyledAIChat from "components/system/Taskbar/AI/StyledAIChat";
 import { CloseIcon } from "components/system/Window/Titlebar/WindowActionIcons";
 import Button from "styles/common/Button";
 import { useProcesses } from "contexts/process";
 import { useSession } from "contexts/session";
-import { useFileSystem } from "contexts/fileSystem";
 import { toggleShowDesktop } from "utils/functions";
 
 type CopilotPaletteProps = {
@@ -15,23 +14,25 @@ const CopilotPalette: FC<CopilotPaletteProps> = ({ toggle }) => {
   const [query, setQuery] = useState("");
   const [log, setLog] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const { open, minimize, processes, stackOrder } = useProcesses();
+  const { open, minimize, processes } = useProcesses();
   const session = useSession();
-  const fs = useFileSystem();
 
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
 
-  const run = useCallback(() => {
+  const run = useCallback((): void => {
     const q = query.trim().toLowerCase();
     if (!q) return;
 
-    const add = (s: string) => {
+    const add = (s: string): void => {
       setLog((l) => [s, ...l].slice(0, 50));
       // Also log to SystemLog if available
-      if ((window as any).addSystemLog) {
-        (window as any).addSystemLog("info", `Copilot: ${s}`);
+      const windowWithSystemLog = window as typeof window & {
+        addSystemLog?: (level: string, message: string) => void;
+      };
+      if (windowWithSystemLog.addSystemLog) {
+        windowWithSystemLog.addSystemLog("info", `Copilot: ${s}`);
       }
     };
 
@@ -44,7 +45,7 @@ const CopilotPalette: FC<CopilotPaletteProps> = ({ toggle }) => {
         }, 100);
         add(`Opening ${name}...`);
       } catch (error) {
-        add(`Failed to open ${name}: ${error}`);
+        add(`Failed to open ${name}: ${String(error)}`);
       }
       return;
     }
@@ -75,7 +76,7 @@ const CopilotPalette: FC<CopilotPaletteProps> = ({ toggle }) => {
     }
 
     add("Unknown command. Try: open Terminal, open folder /Users/Public, minimize all, set wallpaper /Users/Public/Videos/im-vengeance-the-batman-moewalls-com");
-  }, [query, open, minimize, processes, session.stackOrder]);
+  }, [query, open, minimize, processes, session]);
 
   const onKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") run();
@@ -86,25 +87,25 @@ const CopilotPalette: FC<CopilotPaletteProps> = ({ toggle }) => {
     <StyledAIChat style={{ height: 240, width: 520 }}>
       <div className="titleBar">
         <div className="title">Copilot</div>
-        <button className="close" onClick={toggle}>
+        <button className="close" type="button" onClick={toggle}>
           <CloseIcon />
         </button>
       </div>
-      <div style={{ padding: 8, display: "grid", gap: 8 }}>
+      <div style={{ display: "grid", gap: 8, padding: 8 }}>
         <input
           ref={inputRef}
-          value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={onKeyDown}
           placeholder="Try: open Terminal | open folder /Users/Public | minimize all"
+          value={query}
         />
         <div style={{ display: "flex", gap: 8 }}>
           <Button onClick={run}>Run</Button>
           <Button onClick={toggle}>Close</Button>
         </div>
-        <ol style={{ margin: 0, padding: 0, display: "grid", gap: 6 }}>
+        <ol style={{ display: "grid", gap: 6, margin: 0, padding: 0 }}>
           {log.map((l, i) => (
-            <li key={`${l}-${i}`} style={{ opacity: 0.9 }}>{l}</li>
+            <li key={`log-${i}-${l.slice(0, 20)}`} style={{ opacity: 0.9 }}>{l}</li>
           ))}
         </ol>
       </div>

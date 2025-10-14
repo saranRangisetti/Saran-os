@@ -43,9 +43,9 @@ class Document extends NextDocument {
     return (
       <Html lang={DEFAULT_LOCALE}>
         <Head>
-          <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-          <link rel="icon" href="/favicon.ico" type="image/x-icon" />
-          <link rel="apple-touch-icon" href="/favicon.svg" />
+          <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
+          <link href="/favicon.ico" rel="icon" type="image/x-icon" />
+          <link href="/favicon.svg" rel="apple-touch-icon" />
         </Head>
         <body>
           <Main />

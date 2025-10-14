@@ -1,60 +1,74 @@
 import { KEYVAL_STORE_NAME, getKeyValStore } from "contexts/fileSystem/core";
 
-type LunrIndex = any;
+interface LunrIndex {
+  add: (doc: RagDoc) => void;
+  field: (field: string) => void;
+  ref: (field: string) => void;
+  toJSON: () => unknown;
+}
 
 export type RagDoc = {
+  content: string;
   id: string;
   path: string;
   title: string;
-  content: string;
 };
 
 export type RagResult = {
   path: string;
-  title: string;
   score: number;
   snippet: string;
+  title: string;
 };
 
 const RAG_PREFIX = "rag:index:";
 
-async function ensureLunr(): Promise<any> {
-  if ((globalThis as any).lunr) return (globalThis as any).lunr;
+interface LunrModule {
+  (config: (this: LunrIndex) => void): LunrIndex;
+  Index: {
+    load: (json: unknown) => LunrIndex;
+  };
+}
+
+async function ensureLunr(): Promise<LunrModule> {
+  if ((globalThis as { lunr?: LunrModule }).lunr) {
+    return (globalThis as { lunr: LunrModule }).lunr;
+  }
 
   await new Promise<void>((resolve, reject) => {
     const script = document.createElement("script");
     script.src = "/System/lunr/lunr.min.js";
     script.async = true;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error("Failed to load lunr"));
-    document.head.appendChild(script);
+    script.addEventListener('load', () => resolve());
+    script.addEventListener('error', () => reject(new Error("Failed to load lunr")));
+    document.head.append(script);
   });
 
-  return (globalThis as any).lunr;
+  return (globalThis as { lunr: LunrModule }).lunr;
 }
 
-export async function loadFolderIndex(folderPath: string): Promise<{ indexJson: any; docs: RagDoc[] } | undefined> {
+export async function loadFolderIndex(folderPath: string): Promise<{ docs: RagDoc[], indexJson: unknown; } | undefined> {
   const db = await getKeyValStore();
   const key = `${RAG_PREFIX}${folderPath}`;
-  const stored = (await db.get(KEYVAL_STORE_NAME, key)) as { indexJson: any; docs: RagDoc[] } | undefined;
+  const stored = (await db.get(KEYVAL_STORE_NAME, key)) as { docs: RagDoc[], indexJson: unknown; } | undefined;
   return stored;
 }
 
-export async function saveFolderIndex(folderPath: string, indexJson: any, docs: RagDoc[]): Promise<void> {
+export async function saveFolderIndex(folderPath: string, indexJson: unknown, docs: RagDoc[]): Promise<void> {
   const db = await getKeyValStore();
   const key = `${RAG_PREFIX}${folderPath}`;
-  await db.put(KEYVAL_STORE_NAME, { indexJson, docs }, key);
+  await db.put(KEYVAL_STORE_NAME, { docs, indexJson }, key);
 }
 
 export async function buildFolderIndex(
   folderPath: string,
   list: (path: string) => Promise<string[]>,
   readFile: (path: string) => Promise<Buffer>
-): Promise<{ indexJson: any; docs: RagDoc[] }> {
+): Promise<{ docs: RagDoc[], indexJson: unknown; }> {
   const lunr = await ensureLunr();
 
   const entries = await list(folderPath);
-  const textFiles = entries.filter((name) => /\.(md|txt)$/i.test(name));
+  const textFiles = entries.filter((name) => /\.(?:md|txt)$/i.test(name));
 
   const docs: RagDoc[] = [];
   for (const name of textFiles) {
@@ -62,14 +76,14 @@ export async function buildFolderIndex(
     try {
       const buf = await readFile(fullPath);
       const content = buf.toString();
-      const title = name.replace(/\.(md|txt)$/i, "");
-      docs.push({ id: fullPath, path: fullPath, title, content });
+      const title = name.replace(/\.(?:md|txt)$/i, "");
+      docs.push({ content, id: fullPath, path: fullPath, title });
     } catch {
       // ignore unreadable files
     }
   }
 
-  const idx: LunrIndex = lunr(function (this: any) {
+  const idx: LunrIndex = lunr(function buildIndex(this: LunrIndex) {
     this.ref("id");
     this.field("title");
     this.field("content");
@@ -80,7 +94,7 @@ export async function buildFolderIndex(
 
   await saveFolderIndex(folderPath, indexJson, docs);
 
-  return { indexJson, docs };
+  return { docs, indexJson };
 }
 
 export async function queryFolder(
@@ -97,13 +111,14 @@ export async function queryFolder(
   }
 
   const idx = lunr.Index.load(stored.indexJson);
-  const results = idx.search(query) as Array<{ ref: string; score: number }>;
+  const results = idx.search(query) as { ref: string; score: number }[];
 
   const docMap = new Map(stored.docs.map((d) => [d.id, d] as const));
   return results.slice(0, 5).map(({ ref, score }) => {
-    const d = docMap.get(ref)!;
+    const d = docMap.get(ref);
+    if (!d) throw new Error(`Document not found: ${ref}`);
     const snippet = makeSnippet(d.content, query);
-    return { path: d.path, title: d.title, score, snippet };
+    return { path: d.path, score, snippet, title: d.title };
   });
 }
 
