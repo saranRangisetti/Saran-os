@@ -1,6 +1,6 @@
 # SaranOS 🌌
 
-A modern desktop environment that runs entirely in your web browser, built by Sai Saran Rangisetti.
+A modern desktop environment that runs entirely in your web browser.
 
 ## About
 
