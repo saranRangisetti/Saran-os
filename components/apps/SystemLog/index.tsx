@@ -59,7 +59,11 @@ const SystemLog: FC<ComponentProcessProps> = ({ id }) => {
     const windowWithSystemLog = window as typeof window & {
       addSystemLog?: (level: string, message: string, details?: string) => void;
     };
-    windowWithSystemLog.addSystemLog = addLog;
+    windowWithSystemLog.addSystemLog = (level: string, message: string, details?: string) => {
+      if (level === "info" || level === "warn" || level === "error") {
+        addLog(level, message, details);
+      }
+    };
     return () => {
       delete windowWithSystemLog.addSystemLog;
     };
@@ -99,9 +103,9 @@ const SystemLog: FC<ComponentProcessProps> = ({ id }) => {
             No log entries yet. Copilot actions will appear here.
           </div>
         ) : (
-          logs.map((log, index) => (
+          logs.map((log) => (
             <div
-              key={`log-${index}-${log.timestamp}`}
+              key={`log-${log.timestamp}-${log.message.slice(0, 10)}-${log.level}`}
               style={{
                 backgroundColor: log.level === "error" ? "rgba(255,0,0,0.1)" : 
                                log.level === "warn" ? "rgba(255,255,0,0.1)" : 

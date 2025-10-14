@@ -84,10 +84,20 @@ const CopilotPalette: FC<CopilotPaletteProps> = ({ toggle }) => {
   }, [run, toggle]);
 
   return (
-    <StyledAIChat style={{ height: 240, width: 520 }}>
+    <StyledAIChat 
+      $primaryColor="#0078d4"
+      $responding={false}
+      $scrollbarVisible={false}
+      $secondaryColor="#106ebe"
+      $tertiaryColor="#005a9e"
+      $typing={false}
+      $width={520}
+      $zIndex={1000}
+      style={{ height: 240, width: 520 }}
+    >
       <div className="titleBar">
         <div className="title">Copilot</div>
-        <button className="close" type="button" onClick={toggle}>
+        <button className="close" onClick={toggle} type="button">
           <CloseIcon />
         </button>
       </div>
@@ -104,8 +114,8 @@ const CopilotPalette: FC<CopilotPaletteProps> = ({ toggle }) => {
           <Button onClick={toggle}>Close</Button>
         </div>
         <ol style={{ display: "grid", gap: 6, margin: 0, padding: 0 }}>
-          {log.map((l, i) => (
-            <li key={`log-${i}-${l.slice(0, 20)}`} style={{ opacity: 0.9 }}>{l}</li>
+          {log.map((l) => (
+            <li key={`log-${l.slice(0, 20)}-${l.length}`} style={{ opacity: 0.9 }}>{l}</li>
           ))}
         </ol>
       </div>

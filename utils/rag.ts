@@ -1,18 +1,19 @@
 import { KEYVAL_STORE_NAME, getKeyValStore } from "contexts/fileSystem/core";
 
-interface LunrIndex {
-  add: (doc: RagDoc) => void;
-  field: (field: string) => void;
-  ref: (field: string) => void;
-  toJSON: () => unknown;
-}
-
 export type RagDoc = {
   content: string;
   id: string;
   path: string;
   title: string;
 };
+
+interface LunrIndex {
+  add: (doc: RagDoc) => void;
+  field: (field: string) => void;
+  ref: (field: string) => void;
+  search: (query: string) => { ref: string; score: number }[];
+  toJSON: () => unknown;
+}
 
 export type RagResult = {
   path: string;
@@ -31,8 +32,8 @@ interface LunrModule {
 }
 
 async function ensureLunr(): Promise<LunrModule> {
-  if ((globalThis as { lunr?: LunrModule }).lunr) {
-    return (globalThis as { lunr: LunrModule }).lunr;
+  if ((globalThis as unknown as { lunr?: LunrModule }).lunr) {
+    return (globalThis as unknown as { lunr: LunrModule }).lunr;
   }
 
   await new Promise<void>((resolve, reject) => {
@@ -44,7 +45,7 @@ async function ensureLunr(): Promise<LunrModule> {
     document.head.append(script);
   });
 
-  return (globalThis as { lunr: LunrModule }).lunr;
+  return (globalThis as unknown as { lunr: LunrModule }).lunr;
 }
 
 export async function loadFolderIndex(folderPath: string): Promise<{ docs: RagDoc[], indexJson: unknown; } | undefined> {
@@ -71,17 +72,21 @@ export async function buildFolderIndex(
   const textFiles = entries.filter((name) => /\.(?:md|txt)$/i.test(name));
 
   const docs: RagDoc[] = [];
-  for (const name of textFiles) {
-    const fullPath = `${folderPath}${folderPath.endsWith("/") ? "" : "/"}${name}`;
-    try {
-      const buf = await readFile(fullPath);
-      const content = buf.toString();
-      const title = name.replace(/\.(?:md|txt)$/i, "");
-      docs.push({ content, id: fullPath, path: fullPath, title });
-    } catch {
-      // ignore unreadable files
+  const processFiles = async (): Promise<void> => {
+    for (const name of textFiles) {
+      const fullPath = `${folderPath}${folderPath.endsWith("/") ? "" : "/"}${name}`;
+      try {
+        const buf = await readFile(fullPath);
+        const content = buf.toString();
+        const title = name.replace(/\.(?:md|txt)$/i, "");
+        docs.push({ content, id: fullPath, path: fullPath, title });
+      } catch {
+        // ignore unreadable files
+      }
     }
-  }
+  };
+  
+  await processFiles();
 
   const idx: LunrIndex = lunr(function buildIndex(this: LunrIndex) {
     this.ref("id");
@@ -116,7 +121,9 @@ export async function queryFolder(
   const docMap = new Map(stored.docs.map((d) => [d.id, d] as const));
   return results.slice(0, 5).map(({ ref, score }) => {
     const d = docMap.get(ref);
-    if (!d) throw new Error(`Document not found: ${ref}`);
+    if (!d) {
+      throw new Error(`Document not found: ${ref}`);
+    }
     const snippet = makeSnippet(d.content, query);
     return { path: d.path, score, snippet, title: d.title };
   });

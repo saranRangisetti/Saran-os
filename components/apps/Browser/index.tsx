@@ -186,7 +186,7 @@ const Browser: FC<ComponentProcessProps> = ({ id }) => {
                       shortcutUrl && exists && (await exists(shortcutUrl))
                         ? shortcutUrl
                         : href;
-                    const stats = stat ? await stat(filePath) : null;
+                    const stats = stat ? await stat(filePath) : undefined;
                     const isDir = stats?.isDirectory();
 
                     return {

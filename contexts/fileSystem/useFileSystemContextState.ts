@@ -308,21 +308,21 @@ const useFileSystemContextState = (): FileSystemContextState => {
       const index = (await (await fetch(url)).json()) as object;
 
       if (!(typeof index === "object" && "fsroot" in index)) {
-        throw new Error("Invalid HTTPRequest FS object.");
+        throw new Error("Invalid XmlHttpRequest FS object.");
       }
 
       const {
-        FileSystem: { HTTPRequest },
+        FileSystem: { XmlHttpRequest },
       } = (await import(
         "public/System/BrowserFS/browserfs.min.js"
       )) as typeof IBrowserFS;
 
       return new Promise((resolve, reject) => {
-        HTTPRequest?.Create(
+        XmlHttpRequest?.Create(
           { baseUrl, index: parseDirectory(index.fsroot as FS9PV4[]) },
           (error, newFs) => {
             if (error || !newFs) {
-              reject(new Error("Error while mounting HTTPRequest FS."));
+              reject(new Error("Error while mounting XmlHttpRequest FS."));
             } else {
               rootFs?.mount?.(mountPoint, newFs);
               resolve();
@@ -371,7 +371,7 @@ const useFileSystemContextState = (): FileSystemContextState => {
                 (systemDirectory ? "" : DEFAULT_MAPPED_NAME);
               const mappedPath = join(directory, mappedName);
 
-              rootFs?.mount?.(mappedPath, newFs);
+              rootFs?.mount?.(mappedPath, newFs as any);
               resolve(systemDirectory ? directory : mappedName);
 
               let observer: FileSystemObserver | undefined;
