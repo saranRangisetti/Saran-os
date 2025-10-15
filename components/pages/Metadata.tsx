@@ -1,9 +1,16 @@
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type FC,
+} from "react";
 import Head from "next/head";
+import desktopIcons from "public/.index/desktopIcons.json";
 import { useFileSystem } from "contexts/fileSystem";
 import { useProcesses } from "contexts/process";
 import { useSession } from "contexts/session";
-import desktopIcons from "public/.index/desktopIcons.json";
 import {
   FAVICON_BASE_PATH,
   HIGH_PRIORITY_ELEMENT,
@@ -20,6 +27,9 @@ import {
 } from "utils/functions";
 
 const { alias, author, description } = PACKAGE_DATA;
+
+// Type assertion for desktopIcons to ensure it's treated as string array
+const desktopIconsArray = desktopIcons as unknown as string[];
 
 const Metadata: FC = () => {
   const [title, setTitle] = useState(alias);
@@ -137,7 +147,7 @@ const Metadata: FC = () => {
         title={`RSS Feed for ${alias}`}
         type="application/rss+xml"
       />
-      {desktopIcons.map((icon) => {
+      {desktopIconsArray.map((icon) => {
         const isSubIcon = icon.includes("/16x16/");
         const dynamicIcon = !isSubIcon && isDynamicIcon(icon);
         const extension = getExtension(icon);
