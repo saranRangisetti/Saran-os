@@ -1,6 +1,9 @@
 import { basename, dirname, isAbsolute, join } from "path";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { type BFSCallback } from "browserfs/dist/node/core/file_system";
+import  {
+  type BFSCallback,
+  type FileSystem as BrowserFSFileSystem,
+} from "browserfs/dist/node/core/file_system";
 import { type ApiError } from "browserfs/dist/node/core/api_error";
 import { type FSModule } from "browserfs/dist/node/core/FS";
 import type IZipFS from "browserfs/dist/node/backend/ZipFS";
@@ -369,7 +372,11 @@ const useFileSystemContextState = (): FileSystemContextState => {
                 (systemDirectory ? "" : DEFAULT_MAPPED_NAME);
               const mappedPath = join(directory, mappedName);
 
-              rootFs?.mount?.(mappedPath, newFs);
+              // FileSystemAccess implementation has the required BrowserFS interface methods
+              rootFs?.mount?.(
+                mappedPath,
+                newFs as unknown as BrowserFSFileSystem
+              );
               resolve(systemDirectory ? directory : mappedName);
 
               let observer: FileSystemObserver | undefined;
