@@ -1,6 +1,6 @@
 import { basename, dirname, isAbsolute, join } from "path";
 import { useCallback, useEffect, useRef, useState } from "react";
-import  {
+import {
   type BFSCallback,
   type FileSystem as BrowserFSFileSystem,
 } from "browserfs/dist/node/core/file_system";

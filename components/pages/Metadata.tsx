@@ -28,8 +28,8 @@ import {
 
 const { alias, author, description } = PACKAGE_DATA;
 
-// Type assertion for desktopIcons to ensure it's treated as string array
-const desktopIconsArray = desktopIcons as unknown as string[];
+// Convert desktopIcons to string array
+const desktopIconsArray: string[] = desktopIcons;
 
 const Metadata: FC = () => {
   const [title, setTitle] = useState(alias);
