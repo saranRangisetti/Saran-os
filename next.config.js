@@ -13,7 +13,7 @@ const webpack = require("webpack");
  * @type {import("next").NextConfig}
  * */
 const nextConfig = {
-  outputFileTracingRoot: path.join(__dirname, '../../'),
+  outputFileTracingRoot: path.join(__dirname, "../../"),
   compiler: {
     reactRemoveProperties: isProduction,
     removeConsole: isProduction,
@@ -71,6 +71,10 @@ const nextConfig = {
     config.resolve.alias["MediaInfoModule.wasm"] = path.resolve(
       __dirname,
       "public/System/mediainfo.js/MediaInfoModule.wasm"
+    );
+    config.resolve.alias["public/.index"] = path.resolve(
+      __dirname,
+      "public/.index"
     );
 
     config.resolve.fallback = config.resolve.fallback || {};

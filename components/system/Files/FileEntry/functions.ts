@@ -1,11 +1,12 @@
 import { basename, dirname, join } from "path";
 import ini from "ini";
-import  { type FSModule } from "browserfs/dist/node/core/FS";
+import { type FSModule } from "browserfs/dist/node/core/FS";
 import type Stats from "browserfs/dist/node/core/node_fs_stats";
 import { monacoExtensions } from "components/apps/MonacoEditor/extensions";
 import extensions from "components/system/Files/FileEntry/extensions";
 import { type FileInfo } from "components/system/Files/FileEntry/useFileInfo";
 import { type FileStat } from "components/system/Files/FileManager/functions";
+import shortcutCache from "public/.index/shortcutCache.json";
 import { get9pModifiedTime, isMountedFolder } from "contexts/fileSystem/core";
 import { type RootFileSystem } from "contexts/fileSystem/useAsyncFs";
 import processDirectory from "contexts/process/directory";
@@ -43,7 +44,6 @@ import {
   VIDEO_FILE_EXTENSIONS,
   YT_ICON_CACHE,
 } from "utils/constants";
-import shortcutCache from "public/.index/shortcutCache.json";
 import {
   blobToBase64,
   bufferToBlob,
@@ -103,7 +103,7 @@ export const getIconFromIni = (
       if (statError) resolve("");
       else if (stats && isExistingFile(stats)) {
         import("public/.index/iniIcons.json").then(({ default: iniCache }) =>
-          resolve(iniCache[directory as keyof typeof iniCache] || "")
+          resolve(iniCache[directory] || "")
         );
       } else {
         fs.readFile(iniPath, (readError, contents = Buffer.from("")) => {
