@@ -2,6 +2,7 @@ import { basename, dirname, join } from "path";
 import ini from "ini";
 import  { type FSModule } from "browserfs/dist/node/core/FS";
 import type Stats from "browserfs/dist/node/core/node_fs_stats";
+import shortcutCache from "public/.index/shortcutCache.json";
 import { monacoExtensions } from "components/apps/MonacoEditor/extensions";
 import extensions from "components/system/Files/FileEntry/extensions";
 import { type FileInfo } from "components/system/Files/FileEntry/useFileInfo";
@@ -43,7 +44,6 @@ import {
   VIDEO_FILE_EXTENSIONS,
   YT_ICON_CACHE,
 } from "utils/constants";
-import shortcutCache from "public/.index/shortcutCache.json";
 import {
   blobToBase64,
   bufferToBlob,
@@ -59,11 +59,11 @@ import {
 } from "utils/functions";
 
 type InternetShortcut = {
-  BaseURL: string;
-  Comment: string;
-  IconFile: string;
-  Type: string;
-  URL: string;
+  BaseURL?: string;
+  Comment?: string;
+  IconFile?: string;
+  Type?: string;
+  URL?: string;
 };
 
 type ShellClassInfo = {
@@ -103,7 +103,7 @@ export const getIconFromIni = (
       if (statError) resolve("");
       else if (stats && isExistingFile(stats)) {
         import("public/.index/iniIcons.json").then(({ default: iniCache }) =>
-          resolve(iniCache[directory as keyof typeof iniCache] || "")
+          resolve(iniCache[directory] || "")
         );
       } else {
         fs.readFile(iniPath, (readError, contents = Buffer.from("")) => {
@@ -181,12 +181,7 @@ export const getShortcutInfo = (
 export const getCachedShortcut = (path: string): FileInfo =>
   getShortcutInfo(
     undefined,
-    (
-      shortcutCache as unknown as Record<
-        string,
-        Record<string, InternetShortcut>
-      >
-    )?.[dirname(path)]?.[basename(path)]
+    shortcutCache?.[dirname(path)]?.[basename(path)]
   );
 
 export const createShortcut = (shortcut: Partial<InternetShortcut>): string =>
