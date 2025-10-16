@@ -4,7 +4,7 @@ import {
   type Mount,
   type ExtendedEmscriptenFileSystem,
 } from "contexts/fileSystem/useAsyncFs";
-import index from "public/.index/fs.9p.json";
+import index from "@public/.index/fs.9p.json";
 import {
   FS_HANDLES,
   MOUNTABLE_EXTENSIONS,

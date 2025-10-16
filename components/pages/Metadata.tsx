@@ -7,7 +7,7 @@ import {
   type FC,
 } from "react";
 import Head from "next/head";
-import desktopIcons from "public/.index/desktopIcons.json";
+import desktopIcons from "@public/.index/desktopIcons.json";
 import { useFileSystem } from "contexts/fileSystem";
 import { useProcesses } from "contexts/process";
 import { useSession } from "contexts/session";

@@ -14,6 +14,10 @@
     "noEmit": true,
     "noImplicitOverride": true,
     "noImplicitReturns": true,
+    "paths": {
+      "@public/*": ["public/*"],
+      "@/*": ["./*"]
+    },
     "plugins": [{ "name": "next" }],
     "resolveJsonModule": true,
     "skipLibCheck": true,

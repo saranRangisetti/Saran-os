@@ -37,6 +37,16 @@
     "unicorn",
     "unused-imports"
   ],
+  "settings": {
+    "import/resolver": {
+      "typescript": {
+        "alwaysTryTypes": true
+      },
+      "node": {
+        "extensions": [".js", ".jsx", ".ts", ".tsx", ".json"]
+      }
+    }
+  },
   "rules": {
     "@next/next/no-img-element": "off",
     "@typescript-eslint/consistent-type-definitions": "off",
