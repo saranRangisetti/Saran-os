@@ -43,7 +43,7 @@ import {
   VIDEO_FILE_EXTENSIONS,
   YT_ICON_CACHE,
 } from "utils/constants";
-import shortcutCache from "public/.index/shortcutCache.json";
+import shortcutCache from "@public/.index/shortcutCache.json";
 import {
   blobToBase64,
   bufferToBlob,
@@ -102,7 +102,7 @@ export const getIconFromIni = (
     fs.lstat(iniPath, (statError, stats) => {
       if (statError) resolve("");
       else if (stats && isExistingFile(stats)) {
-        import("public/.index/iniIcons.json").then(({ default: iniCache }) =>
+        import("@public/.index/iniIcons.json").then(({ default: iniCache }) =>
           resolve(iniCache[directory as keyof typeof iniCache] || "")
         );
       } else {

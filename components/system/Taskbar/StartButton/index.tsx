@@ -18,7 +18,7 @@ type StartButtonProps = {
 const preloadStartMenu = async (): Promise<void> => {
   const preloadedStartMenu = importStartMenu();
   const { default: startMenuIcons } =
-    (await import("public/.index/startMenuIcons.json")) || {};
+    (await import("@public/.index/startMenuIcons.json")) || {};
 
   startMenuIcons?.forEach((icon) => preloadImage(icon));
 
