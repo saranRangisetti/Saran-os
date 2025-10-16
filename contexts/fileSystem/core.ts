@@ -1,10 +1,10 @@
 import { extname, join } from "path";
 import { type openDB } from "idb";
+import index from "public/.index/fs.9p.json";
 import {
   type Mount,
   type ExtendedEmscriptenFileSystem,
 } from "contexts/fileSystem/useAsyncFs";
-import index from "public/.index/fs.9p.json";
 import {
   FS_HANDLES,
   MOUNTABLE_EXTENSIONS,
@@ -111,14 +111,16 @@ const parse9pV4ToV3 = (fs9p: FS9PV4[], path = "/"): FS9PV3[] =>
     ] as FS9PV3;
   });
 
-export const fs9pV4ToV3 = (): FS9P =>
-  index.version === 4
-    ? {
-        fsroot: parse9pV4ToV3(fsroot),
-        size: index.size,
-        version: 3,
-      }
-    : (index as FS9P);
+export const fs9pV4ToV3 = (): FS9P => {
+  if (index.version === 4) {
+    return {
+      fsroot: parse9pV4ToV3(fsroot),
+      size: index.size,
+      version: 3,
+    };
+  }
+  return index as FS9P;
+};
 
 export const supportsIndexedDB = (): Promise<boolean> =>
   new Promise((resolve) => {

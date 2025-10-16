@@ -28,9 +28,6 @@ import {
 
 const { alias, author, description } = PACKAGE_DATA;
 
-// Type assertion for desktopIcons to ensure it's treated as string array
-const desktopIconsArray = desktopIcons as unknown as string[];
-
 const Metadata: FC = () => {
   const [title, setTitle] = useState(alias);
   const [favIcon, setFavIcon] = useState(FAVICON_BASE_PATH);
@@ -147,7 +144,7 @@ const Metadata: FC = () => {
         title={`RSS Feed for ${alias}`}
         type="application/rss+xml"
       />
-      {desktopIconsArray.map((icon) => {
+      {desktopIcons.map((icon) => {
         const isSubIcon = icon.includes("/16x16/");
         const dynamicIcon = !isSubIcon && isDynamicIcon(icon);
         const extension = getExtension(icon);

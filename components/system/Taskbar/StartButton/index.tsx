@@ -20,7 +20,7 @@ const preloadStartMenu = async (): Promise<void> => {
   const { default: startMenuIcons } =
     (await import("public/.index/startMenuIcons.json")) || {};
 
-  startMenuIcons?.forEach((icon) => preloadImage(icon));
+  startMenuIcons.forEach((icon) => preloadImage(icon));
 
   await preloadedStartMenu;
 };
