@@ -9,13 +9,16 @@
   },
   "license": "MIT",
   "engines": {
+    "node": ">=18.0.0",
     "npm": ">=8.0.0"
   },
   "browserslist": [
     "defaults and supports es6 and not ie 11 and >1%"
   ],
   "scripts": {
-    "build": "npm run build:prebuild && next build",
+    "build": "node scripts/build.js",
+    "build:simple": "npm run build:prebuild && next build",
+    "build:ci": "cross-env NEXT_TELEMETRY_DISABLED=1 npm run build:prebuild && next build",
     "build:bundle-analyzer": "npm run build",
     "build:fs:private": "node scripts/fs2json.js --out public/.index/fs.private.9p.json ./public/private",
     "build:fs:public": "node scripts/fs2json.js --exclude .index,private --out public/.index/fs.9p.json ./public",
@@ -60,6 +63,7 @@
     "browserfs": "^1.4.3",
     "butterchurn-presets": "^3.0.0-beta.4",
     "canvas-confetti": "^1.9.3",
+    "cross-env": "^7.0.3",
     "decode-ico": "^0.4.1",
     "dompurify": "^3.2.7",
     "exif-js": "^2.3.0",
