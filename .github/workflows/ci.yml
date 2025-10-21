@@ -23,7 +23,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
-          cache-dependency-path: "saran-main/package-lock.json"
+          cache-dependency-path: "./saran-main/package-lock.json"
 
       - name: Install dependencies
         working-directory: ./saran-main
@@ -72,7 +72,7 @@ jobs:
         with:
           node-version: "20.x"
           cache: "npm"
-          cache-dependency-path: "saran-main/package-lock.json"
+          cache-dependency-path: "./saran-main/package-lock.json"
 
       - name: Install dependencies
         working-directory: ./saran-main
