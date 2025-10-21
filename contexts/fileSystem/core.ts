@@ -1,10 +1,10 @@
 import { extname, join } from "path";
 import { type openDB } from "idb";
+import index from "public/.index/fs.9p.json";
 import {
   type Mount,
   type ExtendedEmscriptenFileSystem,
 } from "contexts/fileSystem/useAsyncFs";
-import index from "public/.index/fs.9p.json";
 import {
   FS_HANDLES,
   MOUNTABLE_EXTENSIONS,
