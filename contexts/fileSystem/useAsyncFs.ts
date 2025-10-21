@@ -1,9 +1,12 @@
 import { join } from "path";
 import { type ApiError } from "browserfs/dist/node/core/api_error";
 import { type FSModule } from "browserfs/dist/node/core/FS";
-import { type default as Stats, type FileType } from "browserfs/dist/node/core/node_fs_stats";
+import {
+  type default as Stats,
+  type FileType,
+} from "browserfs/dist/node/core/node_fs_stats";
 import { useEffect, useMemo, useRef, useState } from "react";
-import type * as IBrowserFS from "browserfs";
+import * as BrowserFS from "browserfs";
 import type EmscriptenFileSystem from "browserfs/dist/node/backend/Emscripten";
 import type MountableFileSystem from "browserfs/dist/node/backend/MountableFileSystem";
 import { isExistingFile } from "components/system/Files/FileEntry/functions";
@@ -13,7 +16,6 @@ import {
   supportsIndexedDB,
 } from "contexts/fileSystem/core";
 import FileSystemConfig from "contexts/fileSystem/FileSystemConfig";
-import * as BrowserFS from "public/System/BrowserFS/browserfs.min.js";
 import {
   ICON_CACHE,
   ICON_CACHE_EXTENSION,
@@ -37,6 +39,8 @@ interface BrowserFSStats extends Stats {
   size: number;
 }
 
+const { BFSRequire, configure } = BrowserFS;
+
 export type AsyncFS = {
   exists: (path: string) => Promise<boolean>;
   lstat: (path: string) => Promise<Stats>;
@@ -54,8 +58,6 @@ export type AsyncFS = {
   ) => Promise<boolean>;
 };
 
-const { BFSRequire, configure } = BrowserFS as typeof IBrowserFS;
-
 // Interface for FileType and Stats classes from BrowserFS
 interface FsStatics {
   FileType: typeof FileType;
@@ -72,7 +74,10 @@ interface FsStatics {
 const getFsStatics = (): FsStatics => {
   const fsModule = BFSRequire("fs") as unknown as FsStatics;
 
-  return { FileType: fsModule.FileType, Stats: fsModule.Stats };
+  return {
+    FileType: { ...fsModule.FileType },
+    Stats: fsModule.Stats,
+  };
 };
 
 export type EmscriptenFS = {
@@ -234,8 +239,7 @@ const useAsyncFs = (): AsyncFSModule => {
               (stats as BrowserFSStats).size === -1 &&
               isExistingFile(stats as BrowserFSStats)
             ) {
-              const { Stats: BfsStats, FileType: BfsFileType } =
-                getFsStatics();
+              const { Stats: BfsStats, FileType: BfsFileType } = getFsStatics();
               return resolve(
                 new BfsStats(
                   BfsFileType.FILE,
@@ -257,7 +261,7 @@ const useAsyncFs = (): AsyncFSModule => {
             if (error) {
               return UNKNOWN_STATE_CODES.has((error as FSError).code)
                 ? resolve(false)
-                : reject(error);
+                : reject(new Error(error.message));
             }
 
             return resolve(true);
@@ -280,7 +284,7 @@ const useAsyncFs = (): AsyncFSModule => {
                   );
                 }
 
-                reject(error);
+                reject(new Error(error.message));
               } else {
                 resolve(!error);
 

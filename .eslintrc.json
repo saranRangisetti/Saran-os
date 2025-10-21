@@ -233,11 +233,33 @@
       "rules": {
         "playwright/no-standalone-expect": "off"
       }
+    },
+    {
+      "files": ["**/*.ts", "**/*.tsx"],
+      "rules": {
+        "import/no-unresolved": [
+          "error",
+          {
+            "ignore": ["\\.json$"]
+          }
+        ]
+      }
     }
   ],
   "reportUnusedDisableDirectives": true,
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "project": true
+  },
+  "settings": {
+    "import/resolver": {
+      "typescript": {
+        "alwaysTryTypes": true,
+        "project": "./tsconfig.json"
+      },
+      "node": {
+        "extensions": [".js", ".jsx", ".ts", ".tsx", ".json"]
+      }
+    }
   }
 }
