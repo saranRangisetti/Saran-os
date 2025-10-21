@@ -1,8 +1,12 @@
 import { join } from "path";
+import { type ApiError } from "browserfs/dist/node/core/api_error";
+import { type FSModule } from "browserfs/dist/node/core/FS";
+import {
+  type default as Stats,
+  type FileType,
+} from "browserfs/dist/node/core/node_fs_stats";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as BrowserFS from "browserfs";
-import { type FSModule } from "browserfs/dist/node/core/FS";
-import type Stats from "browserfs/dist/node/core/node_fs_stats";
 import type EmscriptenFileSystem from "browserfs/dist/node/backend/Emscripten";
 import type MountableFileSystem from "browserfs/dist/node/backend/MountableFileSystem";
 import { isExistingFile } from "components/system/Files/FileEntry/functions";
@@ -18,11 +22,21 @@ import {
   SESSION_FILE,
 } from "utils/constants";
 
-type ErrorCode = "ENOTSUP" | "EISDIR" | "EEXIST" | "ENOENT";
-
+// Type definitions for BrowserFS error handling
 interface FSError extends Error {
-  code: ErrorCode;
+  code: string;
   path?: string;
+}
+
+// Type definitions for BrowserFS Stats
+interface BrowserFSStats extends Stats {
+  atime: Date;
+  birthtime: Date;
+  ctime: Date;
+  isDirectory: () => boolean;
+  mode: number;
+  mtime: Date;
+  size: number;
 }
 
 const { BFSRequire, configure } = BrowserFS;
@@ -44,28 +58,21 @@ export type AsyncFS = {
   ) => Promise<boolean>;
 };
 
-type FSStatics = {
-  FileType: {
-    DIRECTORY: number;
-    FILE: number;
-    SYMLINK: number;
-  };
+// Interface for FileType and Stats classes from BrowserFS
+interface FsStatics {
+  FileType: typeof FileType;
   Stats: new (
-    type: number,
+    itemType: FileType,
     size: number,
     mode?: number,
     atime?: Date,
     mtime?: Date,
-    ctime?: Date,
-    birthtime?: Date
+    ctime?: Date
   ) => Stats;
-};
+}
 
-const getFsStatics = (): FSStatics => {
-  const fsModule = BFSRequire("fs") as FSModule & {
-    FileType: FSStatics["FileType"];
-    Stats: FSStatics["Stats"];
-  };
+const getFsStatics = (): FsStatics => {
+  const fsModule = BFSRequire("fs") as unknown as FsStatics;
 
   return {
     FileType: { ...fsModule.FileType },
@@ -147,15 +154,11 @@ const useAsyncFs = (): AsyncFSModule => {
       readFile: (path) =>
         new Promise((resolve, reject) => {
           fs?.readFile(path, (error, data = Buffer.from("")) => {
-            if (
-              !error ||
-              ((error as FSError)?.code &&
-                UNKNOWN_STATE_CODES.has((error as FSError).code))
-            ) {
+            if (!error || UNKNOWN_STATE_CODES.has((error as FSError).code)) {
               return resolve(data);
             }
 
-            if ((error as FSError)?.code === "EISDIR" && rootFs?.mntMap[path]) {
+            if ((error as FSError).code === "EISDIR" && rootFs?.mntMap[path]) {
               const mountData =
                 rootFs.mntMap[path]._data || rootFs.mntMap[path].data;
 
@@ -173,43 +176,47 @@ const useAsyncFs = (): AsyncFSModule => {
         }),
       rename: (oldPath, newPath) =>
         new Promise((resolve, reject) => {
-          fs?.rename(oldPath, newPath, (error) => {
-            if (!error) {
-              resolve(true);
-            } else if ((error as FSError).code === "ENOTSUP") {
-              fs.lstat(
-                oldPath,
-                (_statsError, stats = Object.create(null) as Stats) => {
-                  if (
-                    stats &&
-                    typeof stats.isDirectory === "function" &&
-                    stats.isDirectory()
-                  ) {
-                    reject(new Error("Renaming directories is not supported."));
-                  } else {
-                    fs.readFile(oldPath, (readError, data) =>
-                      fs.writeFile(newPath, data, (writeError) =>
-                        readError || writeError
-                          ? reject(
+          fs?.rename(
+            oldPath,
+            newPath,
+            (renameError: ApiError | null | undefined) => {
+              if (!renameError) {
+                resolve(true);
+              } else if (renameError.code === "ENOTSUP") {
+                fs.lstat(
+                  oldPath,
+                  (_statsError, stats = Object.create(null) as Stats) => {
+                    if ((stats as BrowserFSStats).isDirectory?.()) {
+                      reject(
+                        new Error("Renaming directories is not supported.")
+                      );
+                    } else {
+                      fs.readFile(oldPath, (readError, data) =>
+                        fs.writeFile(newPath, data, (writeError) => {
+                          if (readError || writeError) {
+                            reject(
                               readError ||
                                 writeError ||
                                 new Error("Failed to rename file.")
-                            )
-                          : resolve(false)
-                      )
-                    );
+                            );
+                          } else {
+                            resolve(false);
+                          }
+                        })
+                      );
+                    }
                   }
-                }
-              );
-            } else if ((error as FSError).code === "EISDIR") {
-              rootFs?.umount(oldPath);
-              asyncFs.rename(oldPath, newPath).then(resolve, reject);
-            } else if (UNKNOWN_STATE_CODES.has((error as FSError).code)) {
-              resolve(false);
-            } else {
-              reject(error);
+                );
+              } else if (renameError.code === "EISDIR") {
+                rootFs?.umount(oldPath);
+                asyncFs.rename(oldPath, newPath).then(resolve, reject);
+              } else if (UNKNOWN_STATE_CODES.has(renameError.code)) {
+                resolve(false);
+              } else {
+                reject(renameError);
+              }
             }
-          });
+          );
         }),
       rmdir: (path) =>
         new Promise((resolve, reject) => {
@@ -220,24 +227,27 @@ const useAsyncFs = (): AsyncFSModule => {
           fs?.stat(path, (error, stats = Object.create(null) as Stats) => {
             if (error) {
               if (UNKNOWN_STATE_CODES.has((error as FSError).code)) {
-                const { Stats: BfsStats, FileType } = getFsStatics();
-                return resolve(new BfsStats(FileType.FILE, -1));
+                const { Stats: BfsStats, FileType: BfsFileType } =
+                  getFsStatics();
+                return resolve(new BfsStats(BfsFileType.FILE, -1));
               }
 
               return reject(error);
             }
 
-            if (stats.size === -1 && isExistingFile(stats)) {
-              const { Stats: BfsStats, FileType } = getFsStatics();
+            if (
+              (stats as BrowserFSStats).size === -1 &&
+              isExistingFile(stats as BrowserFSStats)
+            ) {
+              const { Stats: BfsStats, FileType: BfsFileType } = getFsStatics();
               return resolve(
                 new BfsStats(
-                  FileType.FILE,
+                  BfsFileType.FILE,
                   get9pSize(path),
-                  stats.mode,
-                  stats.atime,
-                  stats.mtime,
-                  stats.ctime,
-                  stats.birthtime
+                  (stats as BrowserFSStats).mode,
+                  (stats as BrowserFSStats).atime,
+                  (stats as BrowserFSStats).mtime,
+                  (stats as BrowserFSStats).ctime
                 )
               );
             }
@@ -249,8 +259,7 @@ const useAsyncFs = (): AsyncFSModule => {
         new Promise((resolve, reject) => {
           fs?.unlink(path, (error) => {
             if (error) {
-              const fsError = error as FSError;
-              return UNKNOWN_STATE_CODES.has(fsError.code)
+              return UNKNOWN_STATE_CODES.has((error as FSError).code)
                 ? resolve(false)
                 : reject(new Error(error.message));
             }
@@ -260,43 +269,43 @@ const useAsyncFs = (): AsyncFSModule => {
         }),
       writeFile: (path, data, overwrite = false) =>
         new Promise((resolve, reject) => {
-          (
-            fs?.writeFile as unknown as (
-              filePath: string,
-              fileData: string | Buffer,
-              options: { flag: string },
-              callback: (error: FSError | null) => void
-            ) => void
-          )?.(path, data, { flag: overwrite ? "w" : "wx" }, (error) => {
-            if (error && (!overwrite || error.code !== "EEXIST")) {
-              if (error.code === "ENOENT" && error.path === "/") {
-                import("contexts/fileSystem/functions").then(
-                  ({ resetStorage }) =>
-                    resetStorage(rootFs).finally(() => window.location.reload())
-                );
-              }
-
-              reject(new Error(error.message));
-            } else {
-              resolve(!error);
-
-              try {
-                if (path !== SESSION_FILE) {
-                  const cachedIconPath = join(
-                    ICON_CACHE,
-                    `${path}${ICON_CACHE_EXTENSION}`
-                  );
-
-                  fs?.exists(
-                    cachedIconPath,
-                    (exists) => exists && fs?.unlink(cachedIconPath)
+          fs?.writeFile(
+            path,
+            data,
+            { flag: overwrite ? "w" : "wx" },
+            (error: ApiError | null | undefined) => {
+              if (error && (!overwrite || error.code !== "EEXIST")) {
+                if (error.code === "ENOENT" && error.path === "/") {
+                  import("contexts/fileSystem/functions").then(
+                    ({ resetStorage }) =>
+                      resetStorage(rootFs).finally(() =>
+                        window.location.reload()
+                      )
                   );
                 }
-              } catch {
-                // Ignore icon cache issues
+
+                reject(new Error(error.message));
+              } else {
+                resolve(!error);
+
+                try {
+                  if (path !== SESSION_FILE) {
+                    const cachedIconPath = join(
+                      ICON_CACHE,
+                      `${path}${ICON_CACHE_EXTENSION}`
+                    );
+
+                    fs?.exists(
+                      cachedIconPath,
+                      (exists) => exists && fs?.unlink(cachedIconPath)
+                    );
+                  }
+                } catch {
+                  // Ignore icon cache issues
+                }
               }
             }
-          });
+          );
         }),
     }),
     [fs, rootFs]
@@ -332,15 +341,17 @@ const useAsyncFs = (): AsyncFSModule => {
     } else {
       const setupFs = (writeToIndexedDB: boolean): void =>
         configure(FileSystemConfig(!writeToIndexedDB), () => {
-          const loadedFs = BFSRequire("fs") as unknown as FSModule & {
-            getRootFS: () => RootFileSystem;
-          };
+          const loadedFs = BFSRequire("fs");
 
-          fsRef.current = loadedFs;
-          setFs(loadedFs);
-          const loadedRoot = loadedFs.getRootFS() as RootFileSystem;
-          if (loadedRoot) {
-            setRootFs(loadedRoot);
+          fsRef.current = loadedFs as unknown as FSModule;
+          setFs(loadedFs as unknown as FSModule);
+          const rootFileSystem = (
+            loadedFs as FSModule & {
+              getRootFS: () => RootFileSystem | null;
+            }
+          ).getRootFS();
+          if (rootFileSystem) {
+            setRootFs(rootFileSystem as RootFileSystem);
           }
         });
 
