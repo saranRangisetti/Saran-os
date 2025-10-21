@@ -240,7 +240,7 @@
         "import/no-unresolved": [
           "error",
           {
-            "ignore": ["^public/.index/.*\\.json$"]
+            "ignore": ["\\.json$"]
           }
         ]
       }
