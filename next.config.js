@@ -17,7 +17,7 @@ const nextConfig = {
   trailingSlash: true,
   compiler: {
     reactRemoveProperties: isProduction,
-    removeConsole: isProduction,
+    removeConsole: false,
     styledComponents: {
       displayName: false,
       fileName: false,
