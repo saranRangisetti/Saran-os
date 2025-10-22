@@ -3,7 +3,6 @@
   "outputDirectory": "out",
   "framework": "nextjs",
   "installCommand": "npm install --legacy-peer-deps",
-  "packageManager": "npm",
   "functions": {
     "pages/api/**/*.js": {
       "maxDuration": 30

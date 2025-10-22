@@ -13,10 +13,11 @@ const webpack = require("webpack");
  * @type {import("next").NextConfig}
  * */
 const nextConfig = {
-  outputFileTracingRoot: path.join(__dirname, "../../"),
+  output: "export",
+  trailingSlash: true,
   compiler: {
     reactRemoveProperties: isProduction,
-    removeConsole: isProduction,
+    removeConsole: false,
     styledComponents: {
       displayName: false,
       fileName: false,

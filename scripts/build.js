@@ -157,6 +157,34 @@ async function verifyBuild() {
     process.exit(1);
   }
 
+  // Generate routes-manifest.json for Vercel
+  const routesManifest = {
+    version: 3,
+    pages404: false,
+    caseSensitive: false,
+    routes: [
+      {
+        page: "/",
+        regex: "^/$",
+      },
+      {
+        page: "/404",
+        regex: "^/404$",
+      },
+    ],
+    dynamicRoutes: [],
+    dataRoutes: [],
+    rewrites: [],
+    redirects: [],
+    headers: [],
+    i18n: null,
+    basePath: "",
+    trailingSlash: true,
+  };
+
+  const routesManifestPath = path.join(outDir, "routes-manifest.json");
+  fs.writeFileSync(routesManifestPath, JSON.stringify(routesManifest, null, 2));
+
   logSuccess("Build verification completed");
 }
 

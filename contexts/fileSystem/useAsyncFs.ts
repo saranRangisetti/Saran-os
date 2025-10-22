@@ -313,6 +313,7 @@ const useAsyncFs = (): AsyncFSModule => {
 
   useEffect(() => {
     if (!fs) {
+      console.log("🔧 Initializing file system...");
       const queueFsCall =
         (name: string) =>
         (...args: unknown[]) => {
@@ -339,8 +340,12 @@ const useAsyncFs = (): AsyncFSModule => {
     } else if ("getRootFS" in fs) {
       runQueuedFsCalls(fs);
     } else {
-      const setupFs = (writeToIndexedDB: boolean): void =>
-        configure(FileSystemConfig(!writeToIndexedDB), () => {
+      const setupFs = (writeToIndexedDB: boolean): void => {
+        console.log("🔧 Setting up file system, writeToIndexedDB:", writeToIndexedDB);
+        const config = FileSystemConfig(!writeToIndexedDB);
+        console.log("🔧 FileSystemConfig result:", config);
+        configure(config, () => {
+          console.log("🔧 File system configured, loading FS module...");
           const loadedFs = BFSRequire("fs");
 
           fsRef.current = loadedFs as unknown as FSModule;
@@ -351,9 +356,13 @@ const useAsyncFs = (): AsyncFSModule => {
             }
           ).getRootFS();
           if (rootFileSystem) {
+            console.log("🔧 Root file system loaded successfully");
             setRootFs(rootFileSystem as RootFileSystem);
+          } else {
+            console.error("❌ Failed to load root file system");
           }
         });
+      };
 
       supportsIndexedDB().then(setupFs);
     }
